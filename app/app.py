@@ -60,10 +60,48 @@ def crop_prediction():
             data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
             my_prediction = crop_recommendation_model.predict(data)
             final_prediction = my_prediction[0]
+        
+        N = int(request.form['nitrogen']) - 15
+        P = int(request.form['phosphorous']) - 15
+        K = int(request.form['pottasium']) - 15
+        ph = float(request.form['ph']) - 0.5
+        rainfall = float(request.form['rainfall']) - 100
+        city = request.form.get("city")
 
-            return render_template('crop-result.html', prediction=final_prediction, title=title)
+        if weather_fetch(city) != None:
+            temperature, humidity = weather_fetch(city)
+            data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+            my_prediction = crop_recommendation_model.predict(data)
+            final_prediction1 = my_prediction[0]
+
+        N = int(request.form['nitrogen']) - 10
+        P = int(request.form['phosphorous']) - 10
+        K = int(request.form['pottasium']) - 10
+        ph = float(request.form['ph']) - 1
+        rainfall = float(request.form['rainfall']) - 200
+        city = request.form.get("city") 
+
+        if weather_fetch(city) != None:
+            temperature, humidity = weather_fetch(city)
+            data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+            my_prediction = crop_recommendation_model.predict(data)
+            final_prediction2 = my_prediction[0]
+            
+            if(final_prediction == final_prediction1 and final_prediction1 == final_prediction2):
+                return render_template('crop-result.html', prediction=final_prediction, title=title)
+            elif (final_prediction == final_prediction1 and final_prediction1 != final_prediction2):
+                return render_template('crop-result.html', prediction=final_prediction, prediction1=final_prediction2, title=title)
+            elif (final_prediction == final_prediction2 and final_prediction1 != final_prediction2):
+                return render_template('crop-result.html', prediction=final_prediction, prediction1=final_prediction1, title=title)
+            elif (final_prediction1 == final_prediction2 and final_prediction1 != final_prediction):
+                return render_template('crop-result.html', prediction=final_prediction, prediction1=final_prediction1, title=title)
+            elif(final_prediction != final_prediction1 and final_prediction1 != final_prediction2 and final_prediction != final_prediction2):
+                return render_template('crop-result.html', prediction=final_prediction, prediction1=final_prediction1, prediction2=final_prediction2, title=title)        
+            else:
+                return render_template('try_again.html', title=title)
         else:
             return render_template('try_again.html', title=title)
+
 
 @ app.route('/about-us')
 def about_us():
